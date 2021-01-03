@@ -2,6 +2,9 @@
 #                                       import                                          #                        
 #########################################################################################
 
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, execute, Aer
+from matplotlib import pyplot as plt
+from qiskit.visualization import plot_histogram
 
 #########################################################################################
 #                                        file                                           #                        
