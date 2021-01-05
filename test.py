@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, execute, Aer
 from matplotlib import pyplot as plt
 from qiskit.visualization import plot_histogram
@@ -103,3 +104,16 @@ plot_histogram(counts)
 # counts = result.get_counts()
 # plot_histogram(counts)
 plt.show()
+=======
+import numpy as np
+# M = np.identity(2)
+# N = np.zeros([2, 2])
+# O = np.identity(2)
+# P = np.zeros([2, 2])
+# A = np.hstack((M, N))
+# B = np.hstack((P, O))
+# C = np.vstack((A, B))
+# print(C)
+a = -3
+print(abs(a))
+>>>>>>> c1bd2f11baab3efa61a5235d0f1564020b4f09b1
