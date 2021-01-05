@@ -2,12 +2,14 @@
 #                                       import                                          #                        
 #########################################################################################
 import numpy as np
-from qiskit import *
-from qiskit.visualization import plot_histogram
+from numpy import sqrt
 from numpy.random import randint
 from matplotlib import pyplot as plt
+from qiskit import *
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, BasicAer, IBMQ
 from qiskit import QuantumCircuit, execute, Aer
+from qiskit.quantum_info import Operator
+from qiskit.visualization import plot_histogram
 from Alice_Bob import construct_alice, construct_bob, construct_decode, construct_encode
 
 #########################################################################################
@@ -37,14 +39,22 @@ print("U_epi_dagger: \n", U_epi_dagger)
 #########################################################################################
 #                                        U_E                                            #                        
 #########################################################################################
-M_0_E = np.identity(2)
-M_1_E = np.identity(2)
+def M_0_Eve(alpha, beta):
+    M_0_E = np.e**(alpha*complex(0, 1))*np.matrix(([1, 0], [0, np.e**(beta*complex(0, 1))]))*np.matrix(([0, 1], [1, 0]))
+    return M_0_E
+
+a, b = np.pi/2, np.pi/2
+M_0_E = M_0_Eve(a, b)
+M_1_E = np.matrix(([-complex(0, 1)/sqrt(2), 1/sqrt(2)], [complex(0, 1)/sqrt(2), 1/sqrt(2)]))
 ZERO_E = np.zeros([2, 2])
 # U_E is an identity matrix (default)
 U_E = np.matrix(np.vstack((np.hstack((M_0_E, ZERO_E)), np.hstack((ZERO_E, M_1_E)))))
 U_E_dagger = np.matrix(U_E).H.T
 print("U_E: \n", U_E)
 print("U_E_dagger: \n", U_E_dagger)
+# Operator to gate
+U1_op = Operator(U_E)
+print("U_E to gate: ", U1_op)
 
 #########################################################################################
 #                                        rho                                            #                        
@@ -64,8 +74,8 @@ print("rho_E_double_prime: \n", rho_E_double_prime)
 #########################################################################################
 # Probability of Eve substituting an authentic message with a different one that passes Bob’s test
 # Define |phi_j>: "bob_bits"
-P_eve = 0.5*(abs(bob_bits*U_E*alice_bits)**2 + abs(bob_bits*U_epi_dagger*U_E*U_epi*alice_bits)**2)
-print("P_f_prime: \n", P_eve)
+# P_eve = 0.5*(abs(bob_bits*U_E*alice_bits)**2 + abs(bob_bits*U_epi_dagger*U_E*U_epi*alice_bits)**2)
+# print("P_f_prime: \n", P_eve)
 
 #########################################################################################
 #                                    Alice & Bob                                        #                        
@@ -74,8 +84,8 @@ sim_qasm = Aer.get_backend('qasm_simulator')
 
 U1_q = QuantumRegister(2)
 U1_c = QuantumCircuit(U1_q, name='U1')
+U1_c.unitary(U1_op,[0,1],label = 'label')
 U1 = U1_c.to_gate()
-U1_dag = U1.inverse()
 
 ka = QuantumRegister(1, name='ka')
 kb = QuantumRegister(1, name='kb')
@@ -96,12 +106,12 @@ bob = construct_bob(U1)
 qc.append(alice, [ka, m[0], m[1]])
 qc.append(bob, [kb, m[0], m[1]])
 
-# qc.measure(m, c)
-# qc.draw(output='mpl')
+qc.measure(m, c)
+qc.draw(output='mpl')
 
-# job = execute(qc, backend=sim_qasm, shots=1e6)
-# result = job.result()
-# counts = result.get_counts()
-# plot_histogram(counts)
+job = execute(qc, backend=sim_qasm, shots=1e6)
+result = job.result()
+counts = result.get_counts()
+plot_histogram(counts)
 
-# plt.show()
+plt.show()
